@@ -1,0 +1,197 @@
+.plateau-cadre {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: clamp(10px, 2.8vw, 17px);
+    border: 1px solid var(--trait);
+    border-radius: 26px;
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--surface-forte) 86%, transparent), var(--surface)),
+        repeating-linear-gradient(0deg, transparent 0 17px, color-mix(in srgb, var(--trait) 35%, transparent) 18px 19px);
+    box-shadow: 0 18px 42px var(--ombre), inset 0 1px rgba(255, 255, 255, .5);
+}
+
+.plateau {
+    --colonnes: 7;
+    --lignes: 7;
+    --cellule: 40px;
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--colonnes) / var(--lignes);
+    border-radius: 15px;
+    outline: none;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+.plateau:focus-visible { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent); }
+
+.case-zone {
+    position: absolute;
+    left: calc(var(--x) * 100% / var(--colonnes));
+    top: calc(var(--y) * 100% / var(--lignes));
+    width: calc(100% / var(--colonnes));
+    height: calc(100% / var(--lignes));
+    padding: 1.5px;
+    pointer-events: none;
+}
+
+.case-zone::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--zone-trait);
+    border-radius: clamp(5px, 1.3vw, 9px);
+    background:
+        radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--surface-forte) 42%, transparent) 0 5%, transparent 6%),
+        var(--zone);
+    box-shadow: inset 0 1px 2px color-mix(in srgb, var(--surface-forte) 55%, transparent);
+}
+
+.piece {
+    --piece-cell: var(--cellule);
+    position: relative;
+    display: block;
+    width: calc(var(--largeur-piece) * var(--piece-cell));
+    height: calc(var(--hauteur-piece) * var(--piece-cell));
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    color: inherit;
+    background: transparent;
+    appearance: none;
+    cursor: grab;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+    transition: filter .16s ease, opacity .16s ease, transform .16s ease;
+}
+
+.piece:active { cursor: grabbing; }
+.piece:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
+.piece.selectionnee { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 72%, transparent)); z-index: 20; }
+.piece.selectionnee .carreau-piece::before { box-shadow: inset 0 1px 1px rgba(255, 255, 255, .55), inset 0 -2px 2px rgba(0, 0, 0, .12), 0 0 0 2px var(--surface-forte), 0 0 0 4px var(--accent); }
+.piece.source-glisser { opacity: .2; }
+
+.carreau-piece {
+    position: absolute;
+    left: calc(var(--x) * var(--piece-cell));
+    top: calc(var(--y) * var(--piece-cell));
+    width: var(--piece-cell);
+    height: var(--piece-cell);
+    padding: 1.5px;
+    pointer-events: none;
+}
+
+.carreau-piece::before {
+    content: '';
+    position: absolute;
+    inset: 1.5px;
+    border: 1px solid color-mix(in srgb, var(--couleur-piece) 64%, #181818);
+    border-radius: clamp(5px, 1.3vw, 9px);
+    background-color: var(--couleur-piece);
+    background-image:
+        linear-gradient(145deg, rgba(255, 255, 255, .28), transparent 42%, rgba(0, 0, 0, .09)),
+        radial-gradient(circle at 28% 22%, rgba(255, 255, 255, .42) 0 3%, transparent 4%);
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, .48),
+        inset 0 -2px 2px rgba(0, 0, 0, .11),
+        0 2px 4px color-mix(in srgb, var(--couleur-piece) 30%, var(--ombre));
+}
+
+[data-motifs="oui"] .piece .carreau-piece::after {
+    content: '';
+    position: absolute;
+    inset: 26%;
+    border-radius: 2px;
+    opacity: .2;
+    background: repeating-linear-gradient(var(--motif-angle), #17202a 0 1px, transparent 1px 4px);
+    pointer-events: none;
+}
+
+.piece.sur-plateau {
+    position: absolute;
+    left: calc(var(--piece-x) * var(--cellule));
+    top: calc(var(--piece-y) * var(--cellule));
+    z-index: 10;
+}
+
+.reserve {
+    --piece-cell: clamp(18px, 5.9vw, 29px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
+    gap: clamp(14px, 4vw, 28px);
+    min-height: 180px;
+    padding: 20px 12px;
+    border: 1px dashed var(--trait);
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at center, color-mix(in srgb, var(--accent) 5%, transparent), transparent 66%),
+        color-mix(in srgb, var(--fond-2) 68%, transparent);
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+.piece.dans-reserve { --piece-cell: clamp(18px, 5.9vw, 29px); flex: 0 0 auto; }
+.reserve-vide { margin: 0; color: var(--texte-doux); text-align: center; font-size: .9rem; }
+
+.piece-fantome {
+    position: fixed;
+    z-index: 1000;
+    margin: 0;
+    opacity: .9;
+    pointer-events: none;
+    filter: drop-shadow(0 12px 13px rgba(0, 0, 0, .25));
+    transform: scale(1.04);
+}
+
+.curseur-plateau {
+    position: absolute;
+    left: calc(var(--curseur-x) * var(--cellule) + 4px);
+    top: calc(var(--curseur-y) * var(--cellule) + 4px);
+    width: calc(var(--cellule) - 8px);
+    height: calc(var(--cellule) - 8px);
+    border: 2px dashed var(--accent);
+    border-radius: 8px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 30;
+}
+
+.plateau:focus-visible .curseur-plateau { opacity: .9; }
+
+.plateau.refus { animation: refus .27s ease; }
+@keyframes refus { 25% { transform: translateX(-5px); } 60% { transform: translateX(5px); } }
+
+.confettis { position: fixed; inset: 0; z-index: 2000; pointer-events: none; overflow: hidden; }
+.confettis i {
+    position: absolute;
+    left: var(--x);
+    top: -18px;
+    width: 10px;
+    height: 14px;
+    border-radius: 3px;
+    background: var(--couleur-piece);
+    animation: tomber 1.55s cubic-bezier(.2, .7, .45, 1) var(--delai) forwards;
+}
+@keyframes tomber { to { transform: translate3d(22px, 108vh, 0) rotate(var(--tour)); } }
+
+@media (min-width: 780px) {
+    .reserve { --piece-cell: clamp(17px, 2.6vw, 26px); min-height: 260px; }
+    .piece.dans-reserve { --piece-cell: clamp(17px, 2.6vw, 26px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .piece { transition: none; }
+    .plateau.refus { animation: none; }
+    .confettis { display: none; }
+}

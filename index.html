@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="atelier" data-motifs="oui">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Polyominos</title>
+<meta name="description" content="Remplissez une silhouette avec toutes les pièces imposées. Puzzles procéduraux, défi du jour et trois difficultés, jouables hors ligne.">
+<meta name="theme-color" content="#c75b3c" id="couleur-barre">
+<meta name="color-scheme" content="light dark">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="stylesheet" href="css/themes.css">
+<link rel="stylesheet" href="css/plateau.css">
+<link rel="stylesheet" href="css/interface.css">
+<script>
+    try {
+        const enveloppe = JSON.parse(localStorage.getItem('polyominos.preferences') || '{}');
+        const prefs = enveloppe && enveloppe.schema === 1 ? enveloppe.donnees || {} : {};
+        if (/^(atelier|sauge|ocean|bonbon|ardoise|nuit)$/.test(prefs.theme || '')) {
+            document.documentElement.dataset.theme = prefs.theme;
+        }
+        if (typeof prefs.motifs === 'boolean') document.documentElement.dataset.motifs = prefs.motifs ? 'oui' : 'non';
+    } catch { /* le thème Atelier reste lisible */ }
+</script>
+</head>
+<body>
+
+<div class="app">
+    <header class="topbar">
+        <div class="marque">
+            <span class="mini-piece" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+            <div><p class="surtitre">L’atelier de pavage</p><h1>Polyominos</h1></div>
+        </div>
+        <div class="topbar-actions">
+            <button type="button" class="bouton-icone" id="bouton-aide" aria-label="Règles du jeu">?</button>
+            <button type="button" class="bouton-icone" id="bouton-theme" aria-label="Changer de thème"><span aria-hidden="true">◐</span></button>
+            <button type="button" class="bouton-icone" id="bouton-stats" aria-label="Statistiques"><span aria-hidden="true">▥</span></button>
+            <button type="button" class="bouton-icone" id="bouton-options" aria-label="Options"><span aria-hidden="true">⚙</span></button>
+        </div>
+    </header>
+
+    <section class="hud" aria-label="État de la partie">
+        <div class="hud-carte hud-mode"><span>Grille</span><strong id="hud-mode">Défi du jour</strong></div>
+        <div class="hud-carte"><span>Pièces</span><strong id="hud-pieces">0/9</strong></div>
+        <div class="hud-carte"><span>Mouvements</span><strong id="hud-mouvements">0</strong></div>
+        <div class="hud-carte"><span>Temps</span><strong id="hud-temps">0:00</strong></div>
+    </section>
+
+    <main>
+        <section class="zone-pavage" aria-labelledby="titre-zone">
+            <div class="titre-section">
+                <div><p class="surtitre">La silhouette</p><h2 id="titre-zone">Remplissez toute la zone</h2></div>
+                <span class="indication">Glissez une pièce</span>
+            </div>
+            <div class="plateau-cadre">
+                <div id="plateau" class="plateau" role="application" tabindex="0" aria-label="Zone de pavage">
+                    <span id="curseur-plateau" class="curseur-plateau" aria-hidden="true"></span>
+                </div>
+            </div>
+            <p id="annonce" class="annonce" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="atelier" aria-labelledby="titre-pieces">
+            <div class="titre-section compact">
+                <div><p class="surtitre">Votre établi</p><h2 id="titre-pieces">Pièces à poser</h2></div>
+                <span class="compteur-indices" id="compteur-indices"></span>
+            </div>
+
+            <div class="outils-piece" role="group" aria-label="Transformer la pièce sélectionnée">
+                <button type="button" id="bouton-rotation-gauche" aria-label="Tourner à gauche"><span aria-hidden="true">↶</span><small>Tourner</small></button>
+                <button type="button" id="bouton-rotation-droite" aria-label="Tourner à droite"><span aria-hidden="true">↷</span><small>Tourner</small></button>
+                <button type="button" id="bouton-retourner" aria-label="Retourner comme dans un miroir" hidden><span aria-hidden="true">↔</span><small>Miroir</small></button>
+                <button type="button" id="bouton-reserve" aria-label="Remettre dans la réserve"><span aria-hidden="true">⌄</span><small>Ranger</small></button>
+            </div>
+
+            <div id="reserve" class="reserve" aria-label="Réserve de pièces"></div>
+
+            <div class="actions-jeu">
+                <button type="button" class="bouton secondaire" id="bouton-annuler"><span aria-hidden="true">↶</span> Annuler</button>
+                <button type="button" class="bouton secondaire" id="bouton-indice"><span aria-hidden="true">✦</span> Indice</button>
+                <button type="button" class="bouton secondaire" id="bouton-partager"><span aria-hidden="true">↑</span> Partager</button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="barre-parties">
+        <button type="button" class="bouton quotidien" id="bouton-quotidien"><span aria-hidden="true">☀</span><span><small>La même pour tous</small>Défi du jour</span></button>
+        <button type="button" class="bouton primaire" id="bouton-nouveau"><span aria-hidden="true">＋</span><span><small>Graine aléatoire</small>Nouvelle grille</span></button>
+    </footer>
+</div>
+
+<div id="confettis" class="confettis" aria-hidden="true"></div>
+
+<dialog id="dialogue-fin" class="dialog fin">
+    <div class="medaille" aria-hidden="true"><span>✓</span></div>
+    <p class="surtitre">Pavage réussi</p>
+    <h2>Tout s’emboîte !</h2>
+    <p class="dialog-intro">La silhouette est pleine, sans chevauchement et sans une case oubliée.</p>
+    <dl class="resultat">
+        <div><dt>Temps</dt><dd id="fin-temps">0:00</dd></div>
+        <div><dt>Mouvements</dt><dd id="fin-mouvements">0</dd></div>
+        <div><dt>Indices</dt><dd id="fin-indices">Aucun</dd></div>
+    </dl>
+    <p class="sans-indice" id="fin-sans-indice">✨ Résolu sans indice</p>
+    <div class="dialog-actions">
+        <button type="button" class="bouton secondaire" id="fin-partager">Partager</button>
+        <button type="button" class="bouton primaire" id="fin-rejouer">Nouvelle grille</button>
+    </div>
+    <button type="button" class="fermer-texte" data-fermer>Revoir le pavage</button>
+</dialog>
+
+<dialog id="dialogue-options" class="dialog grande">
+    <div class="dialog-entete"><div><p class="surtitre">Personnaliser</p><h2>Options</h2></div><button type="button" class="bouton-icone" data-fermer aria-label="Fermer">×</button></div>
+
+    <h3>Difficulté des grilles libres</h3>
+    <div class="choix-niveau" id="choix-niveau" role="group" aria-label="Difficulté"></div>
+
+    <h3>Couleurs</h3>
+    <div class="choix-theme" id="choix-theme" role="group" aria-label="Thème de couleurs"></div>
+
+    <h3>Confort</h3>
+    <label class="option"><input type="checkbox" id="option-motifs"><span><strong>Repères graphiques</strong><small>Des motifs distinguent aussi les couleurs des pièces.</small></span></label>
+    <label class="option"><input type="checkbox" id="option-sons"><span><strong>Sons discrets</strong><small>Un petit son accompagne les pièces et la victoire.</small></span></label>
+    <label class="option"><input type="checkbox" id="option-vibration"><span><strong>Vibration</strong><small>Un retour tactile confirme les gestes sur mobile.</small></span></label>
+
+    <p class="version" id="version">Polyominos 1.0.0</p>
+    <div class="dialog-actions"><button type="button" class="bouton secondaire" data-fermer>Fermer</button><button type="button" class="bouton primaire" id="options-jouer">Jouer ce niveau</button></div>
+</dialog>
+
+<dialog id="dialogue-stats" class="dialog grande">
+    <div class="dialog-entete"><div><p class="surtitre">Votre carnet</p><h2>Résultats</h2></div><button type="button" class="bouton-icone" data-fermer aria-label="Fermer">×</button></div>
+    <div class="serie-cartes">
+        <div><span>Série actuelle</span><strong id="stat-serie">0</strong><small>jours</small></div>
+        <div><span>Meilleure série</span><strong id="stat-meilleure-serie">0</strong><small>jours</small></div>
+    </div>
+    <h3>Par difficulté</h3>
+    <dl class="stats-niveaux" id="stats-niveaux"></dl>
+    <h3>Derniers pavages</h3>
+    <p id="historique-vide" class="dialog-intro">Aucun pavage terminé pour le moment.</p>
+    <ol class="historique" id="historique"></ol>
+    <div class="dialog-actions"><button type="button" class="bouton danger" id="effacer-stats">Effacer les résultats</button><button type="button" class="bouton primaire" data-fermer>Fermer</button></div>
+</dialog>
+
+<dialog id="dialogue-aide" class="dialog grande">
+    <div class="dialog-entete"><div><p class="surtitre">Comment jouer</p><h2>Règles</h2></div><button type="button" class="bouton-icone" data-fermer aria-label="Fermer">×</button></div>
+    <p class="dialog-intro">Posez toutes les pièces dans la silhouette claire. Chaque case doit être couverte exactement une fois : aucun trou, aucun chevauchement.</p>
+    <div class="etapes-aide">
+        <div><span>1</span><p><strong>Choisissez</strong> une pièce dans la réserve.</p></div>
+        <div><span>2</span><p><strong>Glissez-la</strong> sur la zone ; elle s’aligne automatiquement.</p></div>
+        <div><span>3</span><p><strong>Tournez-la</strong> avec les flèches. En Expert, utilisez aussi le miroir.</p></div>
+    </div>
+    <h3>Les trois niveaux</h3>
+    <dl class="aide-niveaux">
+        <div><dt>Doux</dt><dd>Un rectangle régulier et sept pièces.</dd></div>
+        <div><dt>Corsé</dt><dd>Une silhouette irrégulière et neuf pièces.</dd></div>
+        <div><dt>Expert</dt><dd>Onze pièces, des trous et des retournements miroir.</dd></div>
+    </dl>
+    <h3>Au clavier</h3>
+    <p>Sélectionnez une pièce avec <kbd>Tab</kbd> puis <kbd>Entrée</kbd>. Placez le curseur sur la zone avec les flèches et validez avec <kbd>Entrée</kbd>. <kbd>R</kbd> tourne, <kbd>F</kbd> retourne, <kbd>U</kbd> annule.</p>
+    <div class="dialog-actions"><button type="button" class="bouton primaire" data-fermer>À vous de jouer</button></div>
+</dialog>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
+

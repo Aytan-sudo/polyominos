@@ -1,0 +1,58 @@
+// Coquille statique, réseau d'abord et cache en secours. Le numéro suit la
+// version du jeu afin qu'une mise à jour ne conserve jamais un ancien moteur.
+
+const VERSION = 'polyominos-1.0.0';
+const COQUILLE = [
+    './',
+    'index.html',
+    'manifest.webmanifest',
+    'css/interface.css',
+    'css/plateau.css',
+    'css/themes.css',
+    'js/app.js',
+    'js/config.js',
+    'js/generateur.js',
+    'js/hasard.js',
+    'js/partage.js',
+    'js/partie.js',
+    'js/polyominos.js',
+    'js/rendu.js',
+    'js/son.js',
+    'js/stockage.js',
+    'js/themes.js',
+    'assets/icon-180.png',
+    'assets/icon-192.png',
+    'assets/icon-512.png'
+];
+
+self.addEventListener('install', evenement => {
+    evenement.waitUntil(
+        caches.open(VERSION)
+            .then(cache => cache.addAll(COQUILLE))
+            .then(() => self.skipWaiting())
+    );
+});
+
+self.addEventListener('activate', evenement => {
+    evenement.waitUntil(
+        caches.keys()
+            .then(cles => Promise.all(cles.filter(cle => cle !== VERSION).map(cle => caches.delete(cle))))
+            .then(() => self.clients.claim())
+    );
+});
+
+self.addEventListener('fetch', evenement => {
+    if (evenement.request.method !== 'GET') return;
+    evenement.respondWith(
+        fetch(evenement.request)
+            .then(reponse => {
+                if (reponse.ok && new URL(evenement.request.url).origin === location.origin) {
+                    const copie = reponse.clone();
+                    caches.open(VERSION).then(cache => cache.put(evenement.request, copie));
+                }
+                return reponse;
+            })
+            .catch(() => caches.match(evenement.request).then(reponse => reponse || caches.match('./')))
+    );
+});
+
