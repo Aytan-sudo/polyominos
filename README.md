@@ -9,6 +9,13 @@ Le jeu n’a ni serveur ni dépendance de production. Il fonctionne au doigt, à
 la souris et au clavier, reste disponible hors ligne après sa première visite
 et ne transmet aucune donnée.
 
+## Version 1.0.1
+
+- les cibles tactiles de l'interface passent à 44 px (boutons d'en-tête,
+  boutons texte, listes déroulantes), conformément à la convention.
+- les pièces de la réserve déclarent leur exemption (`data-cible-libre`) : la
+  taille d'une pièce est sa forme, pas un choix d'interface.
+
 ## Version 1.0
 
 - glisser-déposer tactile avec alignement automatique sur la grille ;

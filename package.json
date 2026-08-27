@@ -1,6 +1,6 @@
 {
   "name": "polyominos",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Pavage par polyominos procédural, mobile-first, avec défi du jour et reprise locale.",
   "type": "module",
