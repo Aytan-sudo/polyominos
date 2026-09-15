@@ -29,5 +29,16 @@ check('deux jours consécutifs créent une série de deux', statistiques.quotidi
 check('le meilleur temps est conservé', statistiques.niveaux.moyen.meilleurTempsMs === 65000);
 check('le sans-indice est compté séparément', statistiques.niveaux.moyen.sansIndice === 1);
 
-rapport();
+// Le compteur de poses du tampon Logique : il vit dans l'espace du joueur,
+// repart à zéro chaque jour, et ne tourne pas en mode invité.
+const coffrePasseport = new Map();
+const espacePasseport = { getItem: cle => coffrePasseport.get(cle) ?? null, setItem: (cle, valeur) => coffrePasseport.set(cle, String(valeur)) };
+check('passeport : en mode invité, rien n’est compté', stockage.compterPosePasseport('2026-09-15') === null);
+for (let i = 0; i < 19; i++) stockage.compterPosePasseport('2026-09-15', espacePasseport);
+check('passeport : la vingtième pièce posée du jour atteint vingt', stockage.compterPosePasseport('2026-09-15', espacePasseport) === 20);
+check('passeport : le lendemain, on repart de un', stockage.compterPosePasseport('2026-09-16', espacePasseport) === 1);
+coffrePasseport.set('polyominos.passeport', '{cassé');
+check('passeport : un compteur illisible repart proprement', stockage.compterPosePasseport('2026-09-16', espacePasseport) === 1);
+check('passeport : le compteur ne touche pas au stockage du mode invité', localStorage.getItem('polyominos.passeport') === null);
 
+rapport();

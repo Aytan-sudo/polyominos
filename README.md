@@ -9,6 +9,22 @@ Le jeu n’a ni serveur ni dépendance de production. Il fonctionne au doigt, à
 la souris et au clavier, reste disponible hors ligne après sa première visite
 et ne transmet aucune donnée.
 
+## Version 1.1.0 — Le passeport commun
+
+- ouvert depuis le hub avec un passeport, le jeu range préférences, grille en
+  cours et statistiques dans l’espace du joueur ; en mode invité, rien ne change ;
+- une grille complétée donne le tampon **Logique** tout de suite (indices
+  compris) ; sinon, la vingtième pièce posée dans la journée le donne aussi ;
+- **correction** : recharger la page en pleine partie effaçait toutes les pièces
+  posées, car l’adresse `?jour=` relançait une grille neuve. La grille
+  sauvegardée est désormais reprise quand l’adresse la désigne ;
+- **correction** : sur iPhone SE, le titre passait sous le bouton d’aide. Il se
+  règle maintenant sur la place laissée par les boutons, et le logo s’efface sur
+  les très petits écrans ; le zoom tactile est verrouillé comme le veut la
+  convention ;
+- l’adresse garde le profil du passeport ; bandeau du passeport, fichiers
+  `commun/` précachés.
+
 ## Version 1.0.1
 
 - les cibles tactiles de l'interface passent à 44 px (boutons d'en-tête,

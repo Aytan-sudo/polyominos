@@ -56,7 +56,7 @@ check('le manifeste autorise toutes les orientations', manifeste.orientation ===
 check('le manifeste décrit précisément le jeu', manifeste.name === 'Polyominos' && manifeste.description.length > 80);
 check('les trois icônes PNG existent', manifeste.icons.length === 3 && manifeste.icons.every(icone => existsSync(join(racine, icone.src))));
 check('page et manifeste partagent la couleur initiale', page.includes(`content="${manifeste.theme_color}"`));
-check('le thème initial lit le stockage versionné', page.includes("localStorage.getItem('polyominos.preferences')"));
+check('le thème initial lit le stockage versionné', page.includes("getItem('polyominos.preferences')"));
 check('le déploiement Pages attend les tests', lire('.github/workflows/pages.yml').includes('needs: tester') && lire('.github/workflows/pages.yml').includes('actions/deploy-pages@v4'));
 
 rapport();

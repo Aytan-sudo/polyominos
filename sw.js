@@ -1,10 +1,13 @@
 // Coquille statique, réseau d'abord et cache en secours. Le numéro suit la
 // version du jeu afin qu'une mise à jour ne conserve jamais un ancien moteur.
 
-const VERSION = 'polyominos-1.0.1';
+const VERSION = 'polyominos-1.1.0';
 const COQUILLE = [
     './',
     'index.html',
+    'commun/passeport.js',
+    'commun/liaison.js',
+    'commun/passeport.css',
     'manifest.webmanifest',
     'css/interface.css',
     'css/plateau.css',

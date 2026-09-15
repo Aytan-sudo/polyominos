@@ -14,7 +14,7 @@ import {
 import { sonErreur, sonPoser, sonTourner, sonVictoire } from './son.js';
 import {
     chargerPreferences, chargerSession, chargerStatistiques, effacerStatistiques,
-    enregistrerPreferences, enregistrerSession, enregistrerVictoire
+    enregistrerPreferences, enregistrerSession, enregistrerVictoire, compterPosePasseport
 } from './stockage.js';
 import { THEMES, themeSuivant } from './themes.js';
 
@@ -107,9 +107,13 @@ function metaComplete(donnees) {
     };
 }
 
+// Le passeport ne porte que le profil : il reste dans l'adresse, sinon un
+// rechargement retomberait sur le dernier joueur choisi dans le hub.
 function synchroniserAdresse() {
     const url = new URL(location.href);
+    const profil = url.searchParams.get('profil');
     url.search = '';
+    if (profil !== null) url.searchParams.set('profil', profil);
     if (meta.dateJour) {
         url.searchParams.set('jour', meta.dateJour);
     } else {
@@ -184,16 +188,25 @@ function restaurer(session) {
 
 function initialiserPartie() {
     const route = lireRoute();
-    if (route) {
+    const session = chargerSession();
+    const valide = session?.schema === 1 && session.puzzle?.schema === 1 && NIVEAUX[session.meta?.niveau];
+    // L'adresse porte toujours le jour ou la graine de la grille en cours : la
+    // recharger n'est pas demander une grille neuve. Sans ce test, un
+    // rechargement effaçait toutes les pièces posées.
+    const memeGrille = valide && route && session.meta.graine === route.graine && session.meta.niveau === route.niveau;
+    if (route && !memeGrille) {
         demarrer(route);
         return;
     }
-    const session = chargerSession();
-    if (session?.schema === 1 && session.puzzle?.schema === 1 && NIVEAUX[session.meta?.niveau]) {
+    if (valide) {
         try {
             restaurer(session);
             return;
         } catch { /* une session partielle ne doit jamais bloquer le jeu */ }
+    }
+    if (route) {
+        demarrer(route);
+        return;
     }
     const jour = dateLocale();
     demarrer({ graine: `jour-${jour}`, niveau: NIVEAU_QUOTIDIEN, dateJour: jour, quotidien: true });
@@ -228,10 +241,20 @@ function rendreTout() {
     rendreCurseur();
 }
 
+// Le tampon Logique du passeport : une grille complétée le donne tout de suite ;
+// sinon, la vingtième pièce posée dans la journée. En mode invité, rien ne compte.
+function noterPasseport({ pose = false, reussite = false }) {
+    const joueur = globalThis.Passeport;
+    if (!joueur?.profilId) return;
+    const poses = pose ? compterPosePasseport(joueur.jourLocal()) : 0;
+    if (poses !== null) joueur.noter('polyominos', poses, reussite);
+}
+
 function terminerSiBesoin() {
     if (terminee || !estTerminee(puzzle, etats)) return false;
     suspendreChrono();
     terminee = true;
+    noterPasseport({ reussite: true });
     const tempsMs = Math.round(tempsActuel());
     if (!resultatEnregistre) {
         enregistrerVictoire({
@@ -440,6 +463,7 @@ function finGlisser(evenement) {
         return;
     }
     selection = action.id;
+    noterPasseport({ pose: true });
     validerAction(suivants, 'Pièce posée.');
 }
 
@@ -449,6 +473,7 @@ function poserPresDuCurseur(x = curseur.x, y = curseur.y) {
     const cible = chercherPlacementProche(puzzle, etats, etat.id, x, y, etat.rotation, etat.miroir);
     if (!cible) return refuser('Aucune place libre à cet endroit.');
     const suivants = placer(puzzle, etats, etat.id, cible.x, cible.y, etat.rotation, etat.miroir);
+    noterPasseport({ pose: true });
     validerAction(suivants, 'Pièce posée.');
 }
 

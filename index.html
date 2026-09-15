@@ -2,7 +2,7 @@
 <html lang="fr" data-theme="atelier" data-motifs="oui">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Polyominos</title>
 <meta name="description" content="Remplissez une silhouette avec toutes les pièces imposées. Puzzles procéduraux, défi du jour et trois difficultés, jouables hors ligne.">
 <meta name="theme-color" content="#c75b3c" id="couleur-barre">
@@ -13,9 +13,12 @@
 <link rel="stylesheet" href="css/themes.css">
 <link rel="stylesheet" href="css/plateau.css">
 <link rel="stylesheet" href="css/interface.css">
+<link rel="stylesheet" href="commun/passeport.css">
+<script src="commun/passeport.js"></script>
+<script src="commun/liaison.js" defer></script>
 <script>
     try {
-        const enveloppe = JSON.parse(localStorage.getItem('polyominos.preferences') || '{}');
+        const enveloppe = JSON.parse((Passeport.stockageJeu('polyominos') || localStorage).getItem('polyominos.preferences') || '{}');
         const prefs = enveloppe && enveloppe.schema === 1 ? enveloppe.donnees || {} : {};
         if (/^(atelier|sauge|ocean|bonbon|ardoise|nuit)$/.test(prefs.theme || '')) {
             document.documentElement.dataset.theme = prefs.theme;
@@ -27,6 +30,7 @@
 <body>
 
 <div class="app">
+    <div class="passeport-ruban" data-passeport-ruban data-jeu="polyominos" data-consigne="Tampon : une grille complétée ou 20 pièces"></div>
     <header class="topbar">
         <div class="marque">
             <span class="mini-piece" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
@@ -125,7 +129,7 @@
     <label class="option"><input type="checkbox" id="option-sons"><span><strong>Sons discrets</strong><small>Un petit son accompagne les pièces et la victoire.</small></span></label>
     <label class="option"><input type="checkbox" id="option-vibration"><span><strong>Vibration</strong><small>Un retour tactile confirme les gestes sur mobile.</small></span></label>
 
-    <p class="version" id="version">Polyominos 1.0.1</p>
+    <p class="version" id="version">Polyominos 1.1.0</p>
     <div class="dialog-actions"><button type="button" class="bouton secondaire" data-fermer>Fermer</button><button type="button" class="bouton primaire" id="options-jouer">Jouer ce niveau</button></div>
 </dialog>
 

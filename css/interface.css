@@ -29,6 +29,12 @@ button:focus-visible, input:focus-visible { outline: 3px solid color-mix(in srgb
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 1px 12px; }
 .marque { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .marque h1 { margin: -2px 0 0; font-size: clamp(1.35rem, 5.8vw, 2rem); line-height: 1; letter-spacing: -.045em; }
+/* Le titre se regle sur la place que lui laissent les quatre boutons, qui
+   gardent leurs 44 px : sans cela, « Polyominos » passait sous le bouton
+   d'aide sur iPhone SE. Le mot mesure 5 em ; un navigateur sans requetes de
+   conteneur garde la taille precedente. */
+.marque { flex: 1 1 0; container-type: inline-size; --place-logo: 48px; }
+.marque h1 { font-size: min(clamp(1.35rem, 5.8vw, 2rem), calc((100cqw - var(--place-logo)) / 5.1)); }
 .surtitre { margin: 0 0 4px; color: var(--accent-fort); font-size: .68rem; font-weight: 800; letter-spacing: .11em; line-height: 1.1; text-transform: uppercase; }
 
 .mini-piece { position: relative; display: block; flex: 0 0 auto; width: 38px; height: 38px; filter: drop-shadow(0 3px 4px var(--ombre)); }
@@ -219,6 +225,13 @@ kbd { padding: 2px 6px; border: 1px solid var(--trait); border-bottom-width: 2px
     .outils-piece { margin-bottom: 6px; }
     .actions-jeu { margin-top: 6px; }
     .barre-parties { grid-column: 2; grid-row: 4; width: 100%; margin: 0; }
+}
+
+/* Tres petit ecran : le logo cede sa place au titre, qui resterait sinon
+   illisible a cote des boutons. */
+@media (max-width: 360px) {
+    .mini-piece { display: none; }
+    .marque { --place-logo: 0px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
