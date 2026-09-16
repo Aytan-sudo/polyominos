@@ -9,6 +9,12 @@ Le jeu n’a ni serveur ni dépendance de production. Il fonctionne au doigt, à
 la souris et au clavier, reste disponible hors ligne après sa première visite
 et ne transmet aucune donnée.
 
+## Version 1.1.1 — Passeport 1.7.0
+
+Module commun du passeport 1.7.0 : 2048 rejoint le thème Nombres, Snake ouvre le
+thème Aventure, Motamorphose le thème Mots, et Dames, Diamants, Laser & Miroirs
+et Untangle rejoignent le thème Logique. Rien ne change dans le jeu.
+
 ## Version 1.1.0 — Le passeport commun
 
 - ouvert depuis le hub avec un passeport, le jeu range préférences, grille en

@@ -1,7 +1,7 @@
 // Coquille statique, réseau d'abord et cache en secours. Le numéro suit la
 // version du jeu afin qu'une mise à jour ne conserve jamais un ancien moteur.
 
-const VERSION = 'polyominos-1.1.0';
+const VERSION = 'polyominos-1.1.1';
 const COQUILLE = [
     './',
     'index.html',
